@@ -1,5 +1,8 @@
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
+const eat = new Audio("eatfood.mp3");
+const gameover = new Audio("gameover.mp3");
+let isUserInteracted = false;
 
 const grid = 16;
 let score = 0;
@@ -52,24 +55,26 @@ function game() {
     snake.x < 0 ||
     snake.y < 0
   ) {
-    alert("Game Over");
     reset();
   }
 
-  // apple
+  // apple style
   context.fillStyle = "red";
   context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
 
   snake.cells.forEach(function (cell, index) {
+    // Snake style
     context.fillStyle = "green";
     context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
 
     if (cell.x === apple.x && cell.y === apple.y) {
       snake.maxCells++;
-      score++;
+      document.getElementById("score").innerHTML = `Score: ${++score}`;
 
       apple.x = randomAppleSpawn(0, 25) * grid;
       apple.y = randomAppleSpawn(0, 25) * grid;
+
+      eat.play();
     }
 
     for (let i = index + 1; i < snake.cells.length; i++) {
@@ -82,12 +87,17 @@ function game() {
 
 // Game Reset
 function reset() {
+  if (isUserInteracted) gameover.play();
+
+  alert("Game Over");
+
   snake.x = 160;
   snake.y = 160;
   snake.cells = [];
   snake.maxCells = 4;
   snake.dx = grid;
   snake.dy = 0;
+  score = 0;
 
   apple.x = randomAppleSpawn(0, 25) * grid;
   apple.y = randomAppleSpawn(0, 25) * grid;
@@ -95,6 +105,8 @@ function reset() {
 
 // Snake Direction
 document.addEventListener("keydown", function (e) {
+  isUserInteracted = true;
+
   if (e.key === "ArrowUp" && snake.dy === 0) {
     snake.dy = -grid;
     snake.dx = 0;
